@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spam Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <h1>Spam Message Detector</h1>
+    <form action="/predict" method="post">
+        <textarea name="message" rows="10" cols="50" placeholder="Enter a message to check if it's spam..."></textarea><br><br>
+        <input type="submit" value="Predict">
+    </form>
+
+    <div class="about-me">
+        <h2>About This Project</h2>
+        <p>This is a machine learning tool built to detect and filter out spam messages. It was developed as a personal project to demonstrate skills in natural language processing (NLP), model training, and web deployment using Python and Flask.</p>
+
+        <h2>The Creator</h2>
+        <img src="{{ url_for('static', filename='images/David.jpg') }}" alt="Your Photo">
+        <h3>Authored by David Oyeleke</h3>
+        <p class="contact-info"><i class="fas fa-envelope icon"></i> Email: <a href="mailto:davidoyeleke23@gmail.com">davidoyeleke23@gmail.com</a></p>
+        <p class="contact-info"><i class="fab fa-linkedin icon"></i> LinkedIn: <a href="https://www.linkedin.com/in/davidoyeleke23" target="_blank">davidoyeleke23</a></p>
+    </div>
+
+</body>
+</html>
