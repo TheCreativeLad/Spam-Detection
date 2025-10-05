@@ -174,23 +174,35 @@ hr {
     white-space: pre-wrap; /* Preserves formatting of the message */
 }
 
+/* Prediction box now has NO default background */
 .prediction-box {
     margin-bottom: 20px;
     padding: 15px;
-    background-color: #e2f0e4; /* Light green for ham */
     border-radius: 8px;
     font-size: 1.5em;
     font-weight: bold;
+    transition: background-color 0.3s ease; /* Smooth transition for color change */
+}
+
+/* --- NEW: Dynamic Styling Classes --- */
+
+/* Style for a correct prediction (Ham) */
+.ham-result {
+    background-color: #e2f0e4; /* Light Green */
+    color: #198754; /* Dark Green text */
+}
+
+/* Style for a warning/spam prediction (Spam) */
+.spam-result {
+    background-color: #fde8e8; /* Light Red/Pink */
+    color: #dc3545; /* Dark Red text */
 }
 
 .prediction-box p {
     margin: 0;
 }
 
-/* Specific colors for spam prediction */
-.prediction-box:has(.emoji) {
-    background-color: #fde8e8; /* Light red for spam */
-}
+/* REMOVED: .prediction-box:has(.emoji) rule that caused the conflict */
 
 .emoji {
     font-size: 4em; /* Large emoji size */
@@ -207,4 +219,47 @@ hr {
 
 .animated-emoji {
     animation: pulse 1.5s infinite; /* Apply the animation */
+}
+
+/* Feedback Form Styling */
+.feedback-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.feedback-section h3 {
+    color: #495057;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+}
+
+.feedback-section label {
+    display: block;
+    margin-bottom: 10px;
+    text-align: left;
+    font-weight: normal;
+    font-size: 1em;
+}
+
+.feedback-section input[type="radio"] {
+    margin-right: 8px;
+}
+
+.feedback-section button {
+    width: auto;
+    padding: 10px 20px;
+    background-color: #28a745; /* Green button for positive action */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+}
+
+.feedback-section button:hover {
+    background-color: #1e7e34;
 }

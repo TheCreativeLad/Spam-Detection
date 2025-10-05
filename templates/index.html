@@ -2,28 +2,248 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Spam Detector</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detector V2</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .card { max-width: 700px; }
+        /* Placeholder for David's image (since we can't display local images on this platform) */
+        .creator-image {
+            width: 100px;
+            height: 100px;
+            background-color: #cbd5e1;
+            border-radius: 9999px; /* rounded-full */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #4b5563;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen flex items-start md:items-center justify-center p-4">
+    <div class="card w-full bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-100 mt-8 md:mt-0">
+        <h1 class="text-4xl font-extrabold text-center text-blue-700 mb-2">Spam Message Detector V2</h1>
+        <p class="text-center text-gray-500 mb-8">Secure Logging to Firestore Database</p>
+        
+        <!-- --- PROJECT INFORMATION & CREATOR SECTION (Merged from your original file) --- -->
+        <div class="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4">About This Project</h2>
+            <p class="text-base text-gray-700 mb-4">
+                This is a machine learning tool built to detect and filter out spam messages. It was developed as a personal project to demonstrate skills in natural language processing (NLP), model training, and web deployment using Python and Flask.
+            </p>
 
-    <h1>Spam Message Detector</h1>
-    <form action="/predict" method="post">
-        <textarea name="message" rows="10" cols="50" placeholder="Enter a message to check if it's spam..."></textarea><br><br>
-        <input type="submit" value="Predict">
-    </form>
+            <div class="flex items-center space-x-4 border-t pt-4 border-blue-200">
+                <!-- Using a placeholder div for the image -->
+                <div class="creator-image">
+                    Photo
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800">Authored by David Oyeleke</h3>
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-envelope icon mr-1"></i> 
+                        Email: <a href="mailto:thedavidoyeleke@gmail.com" class="text-blue-600 hover:underline">thedavidoyeleke@gmail.com</a>
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        <i class="fab fa-linkedin icon mr-1"></i> 
+                        LinkedIn: <a href="https://www.linkedin.com/in/davidoyeleke23" target="_blank" class="text-blue-600 hover:underline">davidoyeleke23</a>
+                    </p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-4">
+                Note: All user feedback is securely logged to a **Firestore** database via the Admin SDK for future model retraining.
+            </p>
+        </div>
+        <!-- --- END PROJECT/CREATOR SECTION --- -->
 
-    <div class="about-me">
-        <h2>About This Project</h2>
-        <p>This is a machine learning tool built to detect and filter out spam messages. It was developed as a personal project to demonstrate skills in natural language processing (NLP), model training, and web deployment using Python and Flask.</p>
+        <p class="text-center text-gray-600 mb-6">Enter the message you want to check for spam below:</p>
+        
+        <form id="prediction-form" onsubmit="event.preventDefault(); makePrediction();" class="space-y-6">
+            <textarea id="message-input" name="message" rows="5" placeholder="Enter your message here..." 
+                      class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm text-base"></textarea>
+            
+            <button type="submit" 
+                    class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
+                Analyze Message
+            </button>
+        </form>
 
-        <h2>The Creator</h2>
-        <img src="{{ url_for('static', filename='images/David.jpg') }}" alt="Your Photo">
-        <h3>Authored by David Oyeleke</h3>
-        <p class="contact-info"><i class="fas fa-envelope icon"></i> Email: <a href="mailto:thedavidoyeleke@gmail.com">thedavidoyeleke@gmail.com</a></p>
-        <p class="contact-info"><i class="fab fa-linkedin icon"></i> LinkedIn: <a href="https://www.linkedin.com/in/davidoyeleke23" target="_blank">davidoyeleke23</a></p>
+        <div id="loading-indicator" class="hidden text-center mt-6">
+            <svg class="animate-spin h-6 w-6 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-sm text-gray-500 mt-2">Connecting to model...</p>
+        </div>
+
+        <!-- This is where the result and feedback form will be dynamically displayed -->
+        <div id="result-container" class="mt-8"></div>
     </div>
 
+    <script>
+        function makePrediction() {
+            const messageInput = document.getElementById('message-input');
+            const resultContainer = document.getElementById('result-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const message = messageInput.value.trim();
+
+            if (!message) {
+                resultContainer.innerHTML = '<div class="bg-yellow-100 text-yellow-800 p-3 rounded-lg font-medium mt-4">Please enter a message before analyzing.</div>';
+                return;
+            }
+
+            // Show loading and clear previous results
+            loadingIndicator.classList.remove('hidden');
+            resultContainer.innerHTML = '';
+
+            // --- CRITICAL CHANGE: Send data as JSON ---
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Matches what Flask's request.get_json() expects
+                },
+                body: JSON.stringify({
+                    message: message 
+                })
+            })
+            .then(response => {
+                loadingIndicator.classList.add('hidden');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                
+                if (data.error) {
+                    resultContainer.innerHTML = `
+                        <div class="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg">
+                            <p class="font-bold">Error:</p>
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Call function to render result, including the feedback form
+                renderResult(message, data.prediction);
+            })
+            .catch(error => {
+                loadingIndicator.classList.add('hidden');
+                console.error('Fetch Error:', error);
+                resultContainer.innerHTML = `
+                    <div class="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg">
+                        An unexpected network error occurred. Check the console for details.
+                    </div>
+                `;
+            });
+        }
+
+        function renderResult(originalMessage, toolPrediction) {
+            let displayMessage;
+            let icon;
+            let colorClass;
+
+            if (toolPrediction === 'spam') {
+                displayMessage = "This message is Spam! 😠 (Model V2)";
+                icon = "❌";
+                colorClass = "bg-red-100 text-red-800 border-red-400";
+            } else {
+                displayMessage = "This message is not Spam. ✅ (Model V2)";
+                icon = "😊";
+                colorClass = "bg-green-100 text-green-800 border-green-400";
+            }
+
+            // Use btoa to safely encode the message for passing to the feedback function
+            const encodedMessage = btoa(originalMessage);
+
+            document.getElementById('result-container').innerHTML = `
+                <div class="${colorClass} p-5 rounded-xl border-l-4 border-b-2 shadow-inner mb-6">
+                    <p class="text-2xl font-bold">${icon} ${displayMessage}</p>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-lg mb-4">
+                    <p class="font-semibold text-gray-700 mb-2">Original Message:</p>
+                    <p class="text-gray-900 italic whitespace-pre-wrap">${originalMessage}</p>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-gray-700 mb-4 mt-6">Was this correct? (Help us improve!)</h3>
+                
+                <div id="feedback-controls" class="space-y-4">
+                    <p class="text-gray-600">If the prediction was incorrect, please provide the correct label to log the error in Firestore:</p>
+                    
+                    <div class="flex space-x-4">
+                        <button type="button" onclick="sendFeedback('${encodedMessage}', '${toolPrediction}', 'spam')" 
+                                class="flex-1 py-3 px-4 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg transition duration-200 ease-in-out shadow-md focus:outline-none">
+                            It should be SPAM
+                        </button>
+                        <button type="button" onclick="sendFeedback('${encodedMessage}', '${toolPrediction}', 'ham')" 
+                                class="flex-1 py-3 px-4 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition duration-200 ease-in-out shadow-md focus:outline-none">
+                            It should not be SPAM
+                        </button>
+                    </div>
+                    
+                    <div id="feedback-status" class="mt-4 text-center"></div>
+                </div>
+            `;
+        }
+        
+        function sendFeedback(encodedMessage, toolPrediction, correctLabel) {
+            const originalMessage = atob(encodedMessage);
+            const statusDiv = document.getElementById('feedback-status');
+            const controlsDiv = document.getElementById('feedback-controls');
+            
+            // Show temporary loading status
+            statusDiv.innerHTML = `<p class="text-gray-500 mt-2"><svg class="animate-spin h-5 w-5 text-gray-500 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Logging to Firestore...</p>`;
+
+            // --- CRITICAL CHANGE: Send feedback data as JSON ---
+            fetch('/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Matches what Flask's request.get_json() expects
+                },
+                body: JSON.stringify({
+                    message: originalMessage,
+                    toolPrediction: toolPrediction,
+                    correctLabel: correctLabel
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Success message
+                    statusDiv.innerHTML = `
+                        <div class="bg-blue-100 text-blue-800 p-3 rounded-lg font-medium">
+                            <i class="fas fa-check-circle mr-2"></i> Feedback received and logged to Firestore! Thank you.
+                        </div>
+                    `;
+                    // Remove buttons after successful submission
+                    const buttons = controlsDiv.querySelectorAll('button');
+                    buttons.forEach(btn => btn.remove());
+                } else {
+                    // Error message
+                    statusDiv.innerHTML = `
+                        <div class="bg-red-100 text-red-800 p-3 rounded-lg font-medium">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> Error submitting feedback: ${data.message}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Feedback Fetch Error:', error);
+                statusDiv.innerHTML = `
+                    <div class="bg-red-100 text-red-800 p-3 rounded-lg font-medium">
+                        <i class="fas fa-times-circle mr-2"></i> Network error while submitting feedback.
+                    </div>
+                `;
+            });
+        }
+    </script>
 </body>
 </html>
