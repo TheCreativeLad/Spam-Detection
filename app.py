@@ -34,9 +34,18 @@ try:
         # 1. Parse the JSON string into a Python dictionary
         cred_dict = json.loads(service_account_json)
         
-        # 2. Use the dictionary content to initialize the Admin SDK
+        # 2. Extract the project ID for explicit initialization
+        project_id = cred_dict.get('project_id') 
+
+        if not project_id:
+            raise ValueError("Service Account JSON is missing 'project_id'.")
+        
+        # 3. Use the dictionary content to initialize the Admin SDK
+        # --- CRITICAL CHANGE HERE: Pass options to explicitly use the project_id ---
         cred = credentials.Certificate(cred_dict)
-        initialize_app(cred)
+        initialize_app(cred, options={'projectId': project_id})
+        # --------------------------------------------------------------------------
+        
         db = firestore.client()
         print(f"INFO: Firebase Admin SDK initialized. Logging to collection: {FEEDBACK_COLLECTION_PATH}")
     else:
