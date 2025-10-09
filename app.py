@@ -32,16 +32,13 @@ try:
         if not project_id:
             raise ValueError("Service Account JSON is missing 'project_id'.")
         
-        # --- FINAL CRITICAL CHANGE: Explicitly define the database URL ---
-        # Construct the default database URL (required for some older or misconfigured projects)
         database_url = f'https://{project_id}.firebaseio.com' 
         
         cred = credentials.Certificate(cred_dict)
         initialize_app(cred, options={
             'projectId': project_id,
-            'databaseURL': database_url # Use the explicit URL
+            'databaseURL': database_url 
         })
-        # --------------------------------------------------------------------------
         
         db = firestore.client()
         print(f"INFO: Firebase Admin SDK initialized. Logging to collection: {FEEDBACK_COLLECTION_PATH}")
@@ -68,12 +65,10 @@ else:
 
 @app.route('/', methods=['GET'])
 def index():
-    """Renders the main prediction interface."""
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    """Receives a message and returns the spam/ham prediction."""
     data = request.get_json()
     message = data.get('message', '')
 
@@ -116,9 +111,13 @@ def submit_feedback():
     # 2. Write to Firestore
     if db:
         try:
-            doc_ref, _ = db.collection(FEEDBACK_COLLECTION_PATH).add(feedback_data)
+            # FIX: We now simply call .add() to write the data.
+            # We don't try to capture the Document ID for local printing,
+            # which completely bypasses the problematic tuple unpacking issue.
+            db.collection(FEEDBACK_COLLECTION_PATH).add(feedback_data)
             
-            print(f"LOGGED: Feedback saved to Firestore. Document ID: {doc_ref.id}")
+            # The log is now a simpler confirmation, removing the .id access
+            print(f"LOGGED: Feedback saved to Firestore.") 
             return jsonify({'status': 'success', 'message': 'Feedback received and logged to Firestore.'})
         except Exception as e:
             print(f"FIREBASE WRITE ERROR: {e}")
