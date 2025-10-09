@@ -116,8 +116,7 @@ def submit_feedback():
     # 2. Write to Firestore
     if db:
         try:
-            doc_ref = db.collection(FEEDBACK_COLLECTION_PATH).add(feedback_data)
-            doc_ref = doc_ref[0]
+            doc_ref, _ = db.collection(FEEDBACK_COLLECTION_PATH).add(feedback_data)
             
             print(f"LOGGED: Feedback saved to Firestore. Document ID: {doc_ref.id}")
             return jsonify({'status': 'success', 'message': 'Feedback received and logged to Firestore.'})
